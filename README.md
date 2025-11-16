@@ -16,6 +16,53 @@ To write a PYTHON program for socket for HTTP for web page upload and download
 6.Stop the program
 <BR>
 ## Program 
+```
+import socket
+def send_request(host, port, request):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((host, port))
+        s.sendall(request.encode())
+        response = s.recv(4096).decode()
+    return response
+
+def upload_file(host, port, filename):
+    with open(filename, 'rb') as file:
+        file_data = file.read()
+        content_length = len(file_data)
+        request = (
+            f"POST /upload HTTP/1.1\r\n"
+            f"Host: {host}\r\n"
+            f"Content-Length: {content_length}\r\n"
+            f"Content-Type: text/plain\r\n"
+            f"\r\n"
+        )
+        request = request + file_data.decode(errors='ignore')
+    response = send_request(host, port, request)
+    return response
+
+def download_file(host, port, filename):
+    request = f"GET /{filename} HTTP/1.1\r\nHost: {host}\r\n\r\n"
+    response = send_request(host, port, request)
+    parts = response.split('\r\n\r\n', 1)
+    if len(parts) > 1:
+        file_content = parts[1]
+        with open('downloaded_' + filename, 'wb') as file:
+            file.write(file_content.encode())
+        print(f"{filename} downloaded successfully.")
+    else:
+        print("Error: No file content found in response.")
+        
+if __name__ == "__main__":
+    host = 'example.com'
+    port = 80
+    upload_response = upload_file(host, port, 'example.txt')
+    print("Upload response:", upload_response)
+    download_file(host, port, 'example.txt')
+```
+
 ## OUTPUT
+
+<img width="987" height="576" alt="image" src="https://github.com/user-attachments/assets/40258e60-2889-4f61-97da-14f2715c07ad" />
+
 ## Result
 Thus the socket for HTTP for web page upload and download created and Executed
